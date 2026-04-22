@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="評估表">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F0E0C">
+<title>教練評估表</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#0F0E0C;
+  --bg2:#1A1814;
+  --bg3:#242018;
+  --border:#332E24;
+  --border2:#4A4232;
+  --text:#F2EDE4;
+  --text2:#A8A090;
+  --text3:#6A6050;
+  --acc:#E8892A;
+  --acc2:#3D2208;
+  --acc-light:#F5A84A;
+  --green:#5CC87A;
+  --green2:#0F2E18;
+  --amber:#E8892A;
+  --amber2:#3D2208;
+  --red:#E05050;
+  --red2:#2E0F0F;
+  --blue:#5B9CF6;
+  --blue2:#0D2040;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh}
+.app{max-width:420px;margin:0 auto;padding:0 0 6rem}
+
+header{padding:1.4rem 1.2rem 0;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'DM Mono',monospace;font-size:11px;color:var(--acc);letter-spacing:.14em;text-transform:uppercase}
+.logo-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.08em}
+
+.progress-wrap{padding:1rem 1.2rem .6rem}
+.progress-bar{height:2px;background:var(--bg3);border-radius:1px;overflow:hidden}
+.progress-fill{height:100%;background:var(--acc);border-radius:1px;transition:width .4s ease}
+.progress-label{display:flex;justify-content:space-between;margin-top:6px}
+.progress-label span{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+
+.page{display:none;padding:0 1.2rem;animation:fadeIn .22s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.page-title{font-size:21px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:1.3rem;line-height:1.6}
+
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:10px}
+.section-head{font-size:10px;font-family:'DM Mono',monospace;color:var(--acc);letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:7px;border-bottom:0.5px solid var(--border)}
+
+.flabel{font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.opt{font-size:11px;color:var(--text3);font-weight:400;margin-left:4px}
+
+input[type=text],input[type=date],textarea,select{
+  width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;
+  padding:10px 12px;font-size:15px;color:var(--text);font-family:'Noto Sans TC',sans-serif;
+  line-height:1.5;resize:none;-webkit-appearance:none;appearance:none
+}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--acc)}
+::placeholder{color:var(--text3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* general multi chips */
+.chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.chip{padding:7px 14px;border-radius:20px;border:0.5px solid var(--border2);font-size:13px;color:var(--text2);cursor:pointer;background:var(--bg3);transition:all .15s;user-select:none;font-family:'Noto Sans TC',sans-serif}
+.chip.sel{background:var(--acc2);border-color:var(--acc);color:var(--acc-light)}
+
+/* single-select assess chips */
+.assess-item{margin-bottom:13px}
+.assess-label{font-size:13px;color:var(--text);margin-bottom:6px;font-weight:500}
+.assess-sub{font-size:11px;color:var(--text3);margin-bottom:5px;line-height:1.5}
+.assess-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.assess-chips .chip{padding:6px 12px;font-size:12px;opacity:.35}
+.assess-chips .chip.active{opacity:1}
+.chip-ok{border-color:var(--green)!important;color:var(--green)!important;background:var(--green2)!important}
+.chip-warn{border-color:var(--amber)!important;color:var(--amber)!important;background:var(--amber2)!important}
+.chip-bad{border-color:var(--red)!important;color:var(--red)!important;background:var(--red2)!important}
+
+/* multi-select joint chips */
+.jchip-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+.jchip{padding:6px 12px;font-size:12px;border-radius:20px;border:0.5px solid var(--border2);color:var(--text3);cursor:pointer;background:var(--bg3);transition:all .15s;user-select:none;font-family:'Noto Sans TC',sans-serif}
+.jchip.ok{border-color:var(--green);color:var(--green);background:var(--green2)}
+.jchip.warn{border-color:var(--amber);color:var(--amber);background:var(--amber2)}
+.jchip.bad{border-color:var(--red);color:var(--red);background:var(--red2)}
+.jchip.on{box-shadow:0 0 0 1.5px currentColor;opacity:1!important}
+.jchip{opacity:.35}
+
+.assess-note{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);font-family:'Noto Sans TC',sans-serif;resize:none}
+.assess-note:focus{outline:none;border-color:var(--acc)}
+
+/* suggestion box */
+.suggest-box{background:var(--acc2);border:0.5px solid var(--amber2);border-left:2px solid var(--acc);border-radius:0 8px 8px 0;padding:8px 10px;margin-top:6px}
+.suggest-label{font-size:11px;color:var(--acc);font-family:'DM Mono',monospace;letter-spacing:.06em;margin-bottom:4px}
+.suggest-box textarea{background:transparent;border:none;border-radius:0;padding:0;font-size:13px;color:var(--text);resize:none;width:100%}
+.suggest-box textarea:focus{outline:none}
+
+.star-row{display:flex;gap:14px;margin:4px 0 6px}
+.star{font-size:28px;cursor:pointer;color:var(--text3);transition:color .15s;user-select:none;line-height:1}
+.star.on{color:var(--acc)}
+.star-lbl{font-size:12px;color:var(--text3);min-height:16px}
+
+.navrow{position:fixed;bottom:0;left:0;right:0;display:flex;gap:10px;padding:1rem 1.2rem 1.8rem;background:linear-gradient(transparent,var(--bg) 32%)}
+.btn-next{flex:1;padding:14px;border-radius:12px;background:var(--acc);color:#000;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Noto Sans TC',sans-serif;letter-spacing:.02em}
+.btn-next:active{opacity:.82}
+.btn-back{padding:14px 18px;border-radius:12px;background:var(--bg2);color:var(--text2);border:0.5px solid var(--border);font-size:15px;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+
+.preview-box{background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:1.1rem;font-size:13px;color:var(--text);white-space:pre-wrap;line-height:1.9;word-break:break-all;font-family:'Noto Sans TC',sans-serif}
+.copy-btn{width:100%;padding:14px;border-radius:12px;background:var(--acc);color:#000;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-top:10px;font-family:'Noto Sans TC',sans-serif}
+.copy-btn:active{opacity:.82}
+.hint{text-align:center;font-size:12px;color:var(--text3);margin-top:8px}
+.sp{height:.8rem}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <span class="logo">Coach · Assessment</span>
+    <span class="logo-date" id="date-display"></span>
+  </header>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog" style="width:11%"></div></div>
+    <div class="progress-label"><span id="prog-step">1 / 9</span><span id="prog-name">學員資訊</span></div>
+  </div>
+
+  <!-- ───── P1 學員資訊 ───── -->
+  <div class="page active" id="p1">
+    <div class="sp"></div>
+    <div class="page-tag">Step 01</div>
+    <div class="page-title">學員基本資訊</div>
+    <div class="page-sub">課程規劃與報告使用</div>
+    <div class="card">
+      <div class="row2">
+        <div><div class="flabel">姓名</div><input type="text" id="f-name" placeholder="學員姓名"></div>
+        <div><div class="flabel">年齡</div><input type="text" id="f-age" placeholder="歲"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flabel">課程目標 <span class="opt">可複選</span></div>
+      <div class="chip-group" id="goals-chips">
+        <div class="chip" onclick="togMulti(this)">增肌</div>
+        <div class="chip" onclick="togMulti(this)">減脂</div>
+        <div class="chip" onclick="togMulti(this)">體態雕塑</div>
+        <div class="chip" onclick="togMulti(this)">健美備賽</div>
+        <div class="chip" onclick="togMulti(this)">動作優化</div>
+        <div class="chip" onclick="togMulti(this)">體能提升</div>
+      </div>
+      <input type="text" id="f-goalother" placeholder="其他目標（選填）">
+    </div>
+    <div class="card">
+      <div class="row2">
+        <div><div class="flabel">訓練年資</div>
+          <select id="f-exp"><option value="">選擇</option><option>無經驗</option><option>6 個月內</option><option>6 個月–1 年</option><option>1–3 年</option><option>超過 3 年</option></select>
+        </div>
+        <div><div class="flabel">每週頻率</div>
+          <select id="f-freq"><option value="">選擇</option><option>0 次</option><option>1–2 次</option><option>3–4 次</option><option>5 次以上</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flabel">傷病史 / 注意事項</div>
+      <textarea id="f-injury" rows="3" placeholder="舊傷、關節問題、家族病史等，無則留空"></textarea>
+    </div>
+  </div>
+
+  <!-- ───── P2 生活習慣 ───── -->
+  <div class="page" id="p2">
+    <div class="sp"></div>
+    <div class="page-tag">Step 02</div>
+    <div class="page-title">生活習慣評估</div>
+    <div class="page-sub">飲食、水分、睡眠詳細記錄</div>
+
+    <div class="card">
+      <div class="section-head">飲食習慣</div>
+      <div class="assess-item"><div class="assess-label">每日餐數</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">3 餐</div><div class="chip chip-warn" onclick="togA(this)">2 餐</div><div class="chip chip-warn" onclick="togA(this)">1 餐</div><div class="chip chip-warn" onclick="togA(this)">不固定</div></div></div>
+      <div class="assess-item"><div class="assess-label">飲食類型</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">均衡飲食</div><div class="chip chip-warn" onclick="togA(this)">外食為主</div><div class="chip chip-warn" onclick="togA(this)">高碳低蛋白</div><div class="chip chip-warn" onclick="togA(this)">節食 / 減量</div><div class="chip chip-bad" onclick="togA(this)">高度加工食品</div></div></div>
+      <div class="assess-item"><div class="assess-label">蛋白質攝取</div>
+        <div class="assess-sub">建議每公斤體重 1.6–2.2g／日</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">足夠</div><div class="chip chip-warn" onclick="togA(this)">略不足</div><div class="chip chip-bad" onclick="togA(this)">明顯不足</div><div class="chip chip-warn" onclick="togA(this)">不清楚</div></div></div>
+      <div class="assess-item"><div class="assess-label">碳水攝取</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">合理</div><div class="chip chip-warn" onclick="togA(this)">偏高</div><div class="chip chip-warn" onclick="togA(this)">偏低</div><div class="chip chip-warn" onclick="togA(this)">不清楚</div></div></div>
+      <div class="assess-item"><div class="assess-label">脂肪攝取</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">合理</div><div class="chip chip-warn" onclick="togA(this)">偏高（油炸/加工）</div><div class="chip chip-warn" onclick="togA(this)">偏低</div></div></div>
+      <div class="assess-item"><div class="assess-label">刻意飲食控制</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">有計畫執行</div><div class="chip chip-warn" onclick="togA(this)">有但不穩定</div><div class="chip chip-warn" onclick="togA(this)">沒有</div></div></div>
+      <div class="assess-item"><div class="assess-label">訓練前後飲食習慣</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">有補充</div><div class="chip chip-warn" onclick="togA(this)">偶爾補充</div><div class="chip chip-bad" onclick="togA(this)">沒有</div></div></div>
+      <textarea class="assess-note" id="lf-food-detail" rows="2" placeholder="飲食細節：例如習慣幾點吃、常吃什麼、特殊需求或過敏"></textarea>
+      <div class="suggest-box">
+        <div class="suggest-label">▸ 飲食調整建議</div>
+        <textarea id="lf-food-suggest" rows="2" placeholder="針對這位學員的飲食調整方向與建議"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">水分攝取</div>
+      <div class="assess-item"><div class="assess-label">每日喝水量</div>
+        <div class="assess-sub">建議每公斤體重 30–40ml／日</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">2500ml 以上</div><div class="chip chip-ok" onclick="togA(this)">2000–2500ml</div><div class="chip chip-warn" onclick="togA(this)">1000–2000ml</div><div class="chip chip-bad" onclick="togA(this)">1000ml 以下</div></div></div>
+      <div class="assess-item"><div class="assess-label">含糖飲品頻率</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">幾乎不喝</div><div class="chip chip-warn" onclick="togA(this)">每週 1–3 次</div><div class="chip chip-bad" onclick="togA(this)">每天都有</div></div></div>
+      <div class="assess-item"><div class="assess-label">咖啡因攝取</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">無 / 少量</div><div class="chip chip-warn" onclick="togA(this)">每天 1–2 杯</div><div class="chip chip-warn" onclick="togA(this)">每天 3 杯以上</div></div></div>
+      <div class="assess-item"><div class="assess-label">飲酒習慣</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">不喝</div><div class="chip chip-warn" onclick="togA(this)">偶爾社交</div><div class="chip chip-bad" onclick="togA(this)">每週固定飲酒</div></div></div>
+      <textarea class="assess-note" id="lf-water-detail" rows="1" placeholder="水分補充備註（例如訓練中補水習慣）"></textarea>
+      <div class="suggest-box">
+        <div class="suggest-label">▸ 水分補充建議</div>
+        <textarea id="lf-water-suggest" rows="2" placeholder="針對喝水量不足或飲品習慣的具體建議"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">睡眠狀況</div>
+      <div class="assess-item"><div class="assess-label">每日睡眠時數</div>
+        <div class="assess-sub">建議 7–9 小時／成人</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">8 小時以上</div><div class="chip chip-ok" onclick="togA(this)">7–8 小時</div><div class="chip chip-warn" onclick="togA(this)">5–7 小時</div><div class="chip chip-bad" onclick="togA(this)">5 小時以下</div></div></div>
+      <div class="assess-item"><div class="assess-label">作息規律性</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">固定規律</div><div class="chip chip-warn" onclick="togA(this)">輪班 / 不固定</div><div class="chip chip-warn" onclick="togA(this)">晚睡（凌晨後）</div></div>
+        <textarea class="assess-note" id="lf-sleeptime-note" rows="1" placeholder="例：約 12 點睡、7 點起"></textarea></div>
+      <div class="assess-item"><div class="assess-label">入睡狀況</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">容易入睡</div><div class="chip chip-warn" onclick="togA(this)">需要 30 分鐘以上</div><div class="chip chip-bad" onclick="togA(this)">長期難以入睡</div></div></div>
+      <div class="assess-item"><div class="assess-label">睡眠品質</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">好睡不易醒</div><div class="chip chip-warn" onclick="togA(this)">淺眠 / 易醒</div><div class="chip chip-bad" onclick="togA(this)">長期睡眠障礙</div></div></div>
+      <div class="assess-item"><div class="assess-label">起床精神狀態</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">清醒有精神</div><div class="chip chip-warn" onclick="togA(this)">需要一段時間</div><div class="chip chip-bad" onclick="togA(this)">長期疲憊</div></div></div>
+      <div class="assess-item"><div class="assess-label">睡眠異狀 <span class="opt">可複選</span></div>
+        <div class="chip-group" id="sleep-issues">
+          <div class="chip" onclick="togMulti(this)">無</div>
+          <div class="chip" onclick="togMulti(this)">打鼾</div>
+          <div class="chip" onclick="togMulti(this)">磨牙</div>
+          <div class="chip" onclick="togMulti(this)">夢多</div>
+          <div class="chip" onclick="togMulti(this)">盜汗</div>
+          <div class="chip" onclick="togMulti(this)">腿部不適</div>
+          <div class="chip" onclick="togMulti(this)">半夜起床</div>
+        </div>
+      </div>
+      <textarea class="assess-note" id="lf-sleep-detail" rows="2" placeholder="睡眠異狀補充說明或其他觀察"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="section-head">壓力 / 恢復</div>
+      <div class="assess-item"><div class="assess-label">日常壓力程度</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">低</div><div class="chip chip-warn" onclick="togA(this)">中</div><div class="chip chip-bad" onclick="togA(this)">高，長期緊繃</div></div></div>
+      <div class="assess-item"><div class="assess-label">非訓練日活動量</div>
+        <div class="assess-chips"><div class="chip chip-warn" onclick="togA(this)">久坐為主</div><div class="chip chip-ok" onclick="togA(this)">輕度活動</div><div class="chip chip-warn" onclick="togA(this)">體力勞動工作</div></div></div>
+    </div>
+  </div>
+
+  <!-- ───── P3 靜態評估 ───── -->
+  <div class="page" id="p3">
+    <div class="sp"></div>
+    <div class="page-tag">Step 03</div>
+    <div class="page-title">靜態評估</div>
+    <div class="page-sub">站姿觀察，前、後、側面</div>
+    <div class="card">
+      <div class="section-head">頭頸 / 上半身</div>
+      <div class="assess-item"><div class="assess-label">頭頸位置</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">頭頸前移</div><div class="chip chip-warn" onclick="togA(this)">側偏</div></div>
+        <textarea class="assess-note" id="n-s-head" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">肩膀高低</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">對稱</div><div class="chip chip-warn" onclick="togA(this)">左高</div><div class="chip chip-warn" onclick="togA(this)">右高</div></div>
+        <textarea class="assess-note" id="n-s-shoulder" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">肩胛位置</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">翼狀肩胛</div><div class="chip chip-warn" onclick="togA(this)">過度前引</div><div class="chip chip-warn" onclick="togA(this)">過度上提</div></div>
+        <textarea class="assess-note" id="n-s-scapula" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">胸椎曲度</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">過度後凸</div><div class="chip chip-warn" onclick="togA(this)">平背</div></div>
+        <textarea class="assess-note" id="n-s-thoracic" rows="1" placeholder="備註"></textarea></div>
+    </div>
+    <div class="card">
+      <div class="section-head">腰椎 / 骨盆</div>
+      <div class="assess-item"><div class="assess-label">腰椎曲度</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">過度前凸</div><div class="chip chip-warn" onclick="togA(this)">平背</div></div>
+        <textarea class="assess-note" id="n-s-lumbar" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">骨盆傾斜</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">中立</div><div class="chip chip-warn" onclick="togA(this)">前傾</div><div class="chip chip-warn" onclick="togA(this)">後傾</div><div class="chip chip-warn" onclick="togA(this)">側傾</div></div>
+        <textarea class="assess-note" id="n-s-pelvis" rows="1" placeholder="備註"></textarea></div>
+    </div>
+    <div class="card">
+      <div class="section-head">下肢排列</div>
+      <div class="assess-item"><div class="assess-label">膝蓋排列</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">膝內扣</div><div class="chip chip-warn" onclick="togA(this)">膝外翻</div><div class="chip chip-warn" onclick="togA(this)">膝過伸</div></div>
+        <textarea class="assess-note" id="n-s-knee" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">足弓 / 足踝</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">扁平足</div><div class="chip chip-warn" onclick="togA(this)">高足弓</div><div class="chip chip-warn" onclick="togA(this)">足踝外翻</div></div>
+        <textarea class="assess-note" id="n-s-foot" rows="1" placeholder="備註"></textarea></div>
+    </div>
+  </div>
+
+  <!-- ───── P4 上肢活動度 ───── -->
+  <div class="page" id="p4">
+    <div class="sp"></div>
+    <div class="page-tag">Step 04</div>
+    <div class="page-title">關節活動度｜上肢</div>
+    <div class="page-sub">可複選，左右差異請備註</div>
+    <div class="card">
+      <div class="section-head">肩關節</div>
+      <div class="assess-item"><div class="assess-label">過頭舉（Overhead）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip bad" onclick="togJ(this)">明顯受限</div><div class="jchip warn" onclick="togJ(this)">左右不對稱</div></div>
+        <textarea class="assess-note" id="n-j-oh" rows="1" placeholder="代償動作、左右差異"></textarea></div>
+      <div class="assess-item"><div class="assess-label">內旋（IR）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-ir" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">外旋（ER）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-er" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">水平內收（Cross Body）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-cross" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">水平外展（Horizontal Abduction）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-habduct" rows="1" placeholder="備註"></textarea></div>
+    </div>
+    <div class="card">
+      <div class="section-head">胸椎</div>
+      <div class="assess-item"><div class="assess-label">旋轉（左 / 右）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">對稱正常</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div><div class="jchip bad" onclick="togJ(this)">雙側受限</div></div>
+        <textarea class="assess-note" id="n-j-trot" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">伸直 / 後凸</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">伸直受限</div><div class="jchip bad" onclick="togJ(this)">過度後凸</div></div>
+        <textarea class="assess-note" id="n-j-text" rows="1" placeholder="備註"></textarea></div>
+    </div>
+  </div>
+
+  <!-- ───── P5 下肢活動度 ───── -->
+  <div class="page" id="p5">
+    <div class="sp"></div>
+    <div class="page-tag">Step 05</div>
+    <div class="page-title">關節活動度｜下肢</div>
+    <div class="page-sub">可複選，左右差異請備註</div>
+    <div class="card">
+      <div class="section-head">髖關節</div>
+      <div class="assess-item"><div class="assess-label">屈曲（Flexion）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-hf" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">內旋（IR）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-hir" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">外旋（ER）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-her" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">伸直（Extension）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-hext" rows="1" placeholder="備註"></textarea></div>
+    </div>
+    <div class="card">
+      <div class="section-head">膝關節</div>
+      <div class="assess-item"><div class="assess-label">屈曲</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-kf" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">伸直</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">過伸</div></div>
+        <textarea class="assess-note" id="n-j-ke" rows="1" placeholder="備註"></textarea></div>
+    </div>
+    <div class="card">
+      <div class="section-head">腳踝 / 腰椎</div>
+      <div class="assess-item"><div class="assess-label">腳踝背屈（Dorsiflexion）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div></div>
+        <textarea class="assess-note" id="n-j-ank" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">腰椎屈曲（Flexion）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip bad" onclick="togJ(this)">疼痛</div></div>
+        <textarea class="assess-note" id="n-j-lf" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">腰椎伸直（Extension）</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">正常</div><div class="jchip warn" onclick="togJ(this)">受限</div><div class="jchip bad" onclick="togJ(this)">疼痛</div></div>
+        <textarea class="assess-note" id="n-j-le" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">腰椎旋轉</div>
+        <div class="jchip-row"><div class="jchip ok" onclick="togJ(this)">對稱正常</div><div class="jchip warn" onclick="togJ(this)">左受限</div><div class="jchip warn" onclick="togJ(this)">右受限</div><div class="jchip bad" onclick="togJ(this)">雙側受限</div></div>
+        <textarea class="assess-note" id="n-j-lrot" rows="1" placeholder="備註"></textarea></div>
+    </div>
+  </div>
+
+  <!-- ───── P6 動態評估 ───── -->
+  <div class="page" id="p6">
+    <div class="sp"></div>
+    <div class="page-tag">Step 06</div>
+    <div class="page-title">動態評估</div>
+    <div class="page-sub">功能性動作觀察</div>
+    <div class="card">
+      <div class="section-head">深蹲模式</div>
+      <div class="assess-item"><div class="assess-label">整體深度</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">全蹲無問題</div><div class="chip chip-warn" onclick="togA(this)">半蹲</div><div class="chip chip-bad" onclick="togA(this)">明顯受限</div></div></div>
+      <div class="assess-item"><div class="assess-label">膝蓋追蹤</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">對齊腳尖</div><div class="chip chip-warn" onclick="togA(this)">膝內扣</div><div class="chip chip-warn" onclick="togA(this)">膝外翻</div></div></div>
+      <div class="assess-item"><div class="assess-label">軀幹控制</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">穩定</div><div class="chip chip-warn" onclick="togA(this)">過度前傾</div><div class="chip chip-warn" onclick="togA(this)">脊椎屈曲</div></div></div>
+      <div class="assess-item"><div class="assess-label">腳踝代償</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">無</div><div class="chip chip-warn" onclick="togA(this)">腳跟抬起</div><div class="chip chip-warn" onclick="togA(this)">足外八代償</div></div></div>
+      <textarea class="assess-note" id="n-d-sq" rows="2" placeholder="深蹲整體備註"></textarea>
+    </div>
+    <div class="card">
+      <div class="section-head">後側鏈（Hip Hinge）</div>
+      <div class="assess-item"><div class="assess-label">髖主導能力</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">可主動髖屈</div><div class="chip chip-warn" onclick="togA(this)">腰椎主導</div><div class="chip chip-bad" onclick="togA(this)">無法分離動作</div></div></div>
+      <div class="assess-item"><div class="assess-label">後側鏈張力</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">腿後緊繃</div><div class="chip chip-warn" onclick="togA(this)">臀部激活不足</div></div></div>
+      <textarea class="assess-note" id="n-d-hh" rows="2" placeholder="後側鏈備註"></textarea>
+    </div>
+    <div class="card">
+      <div class="section-head">核心控制</div>
+      <div class="assess-item"><div class="assess-label">腹內壓建立</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">可主動建立</div><div class="chip chip-warn" onclick="togA(this)">部分</div><div class="chip chip-bad" onclick="togA(this)">無法理解</div></div></div>
+      <div class="assess-item"><div class="assess-label">動作中穩定性</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">穩定</div><div class="chip chip-warn" onclick="togA(this)">輕微晃動</div><div class="chip chip-bad" onclick="togA(this)">明顯代償</div></div></div>
+      <textarea class="assess-note" id="n-d-core" rows="2" placeholder="核心備註"></textarea>
+    </div>
+    <div class="card">
+      <div class="section-head">推模式</div>
+      <div class="assess-item"><div class="assess-label">水平推（臥推 / 伏地挺身）</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">肩胛不穩</div><div class="chip chip-warn" onclick="togA(this)">核心塌陷</div><div class="chip chip-bad" onclick="togA(this)">無法執行</div></div>
+        <textarea class="assess-note" id="n-d-hpush" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">垂直推（肩推 / 過頭推）</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">肩活動度受限</div><div class="chip chip-warn" onclick="togA(this)">腰椎過伸代償</div><div class="chip chip-bad" onclick="togA(this)">無法執行</div></div>
+        <textarea class="assess-note" id="n-d-vpush" rows="1" placeholder="備註"></textarea></div>
+    </div>
+    <div class="card">
+      <div class="section-head">拉模式</div>
+      <div class="assess-item"><div class="assess-label">水平拉（划船 / 繩索）</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">肩胛活動不足</div><div class="chip chip-warn" onclick="togA(this)">上斜方代償</div><div class="chip chip-bad" onclick="togA(this)">無法執行</div></div>
+        <textarea class="assess-note" id="n-d-hpull" rows="1" placeholder="備註"></textarea></div>
+      <div class="assess-item"><div class="assess-label">垂直拉（引體 / 滑輪下拉）</div>
+        <div class="assess-chips"><div class="chip chip-ok" onclick="togA(this)">正常</div><div class="chip chip-warn" onclick="togA(this)">肩胛活動不足</div><div class="chip chip-warn" onclick="togA(this)">上斜方代償</div><div class="chip chip-bad" onclick="togA(this)">無法執行</div></div>
+        <textarea class="assess-note" id="n-d-vpull" rows="1" placeholder="備註"></textarea></div>
+    </div>
+  </div>
+
+  <!-- ───── P7 訓練記錄 ───── -->
+  <div class="page" id="p7">
+    <div class="sp"></div>
+    <div class="page-tag">Step 07</div>
+    <div class="page-title">今日訓練記錄</div>
+    <div class="page-sub">課程執行內容</div>
+    <div class="card">
+      <div class="flabel">今日狀態</div>
+      <div class="star-row">
+        <span class="star" onclick="setStar(1)">★</span><span class="star" onclick="setStar(2)">★</span>
+        <span class="star" onclick="setStar(3)">★</span><span class="star" onclick="setStar(4)">★</span>
+        <span class="star" onclick="setStar(5)">★</span>
+      </div>
+      <div class="star-lbl" id="star-lbl">點選評分</div>
+    </div>
+    <div class="card">
+      <div class="flabel">訓練動作 <span class="opt">每行一個</span></div>
+      <textarea id="f-training" rows="7" placeholder="深蹲 3×10（空槓）&#10;啞鈴肩推 3×12（8kg）&#10;彈力帶臀橋 3×15&#10;農夫走路 2×20m"></textarea>
+    </div>
+    <div class="card">
+      <div class="flabel">表現亮點</div>
+      <textarea id="f-good" rows="2" placeholder="例：學習意願高，動作提示一次就能修正"></textarea>
+    </div>
+    <div class="card">
+      <div class="flabel">需要加強</div>
+      <textarea id="f-improve" rows="2" placeholder="例：深蹲膝蓋控制需多練，建議在家做徒手版本"></textarea>
+    </div>
+  </div>
+
+  <!-- ───── P8 後續規劃 ───── -->
+  <div class="page" id="p8">
+    <div class="sp"></div>
+    <div class="page-tag">Step 08</div>
+    <div class="page-title">後續規劃</div>
+    <div class="page-sub">訓練方向、飲食、預約安排</div>
+    <div class="card">
+      <div class="flabel">下一階段訓練方向</div>
+      <textarea id="f-direction" rows="3" placeholder="例：接下來 4–6 週建立六大動作基礎，穩定後漸進增重"></textarea>
+    </div>
+    <div class="card">
+      <div class="flabel">整體飲食調整建議 <span class="opt">總結版</span></div>
+      <textarea id="f-diet" rows="2" placeholder="綜合飲食評估後給學員的整體建議方向"></textarea>
+    </div>
+    <div class="card">
+      <div class="flabel">上課頻率建議</div>
+      <div class="chip-group" id="freq-chips">
+        <div class="chip sel" onclick="togSingle(this,'freq-chips')">彈性單堂</div>
+        <div class="chip" onclick="togSingle(this,'freq-chips')">每週 1 次</div>
+        <div class="chip" onclick="togSingle(this,'freq-chips')">每週 2 次</div>
+        <div class="chip" onclick="togSingle(this,'freq-chips')">每週 3 次</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flabel">下次預約 <span class="opt">選填</span></div>
+      <input type="text" id="f-nextbook" placeholder="例：下週六早上 / 具體日期時間">
+    </div>
+    <div class="card">
+      <div class="flabel">給學員的話</div>
+      <textarea id="f-msg" rows="3" placeholder="個人化，針對這位學員寫，不要制式化"></textarea>
+    </div>
+  </div>
+
+  <!-- ───── P9 預覽傳送 ───── -->
+  <div class="page" id="p9">
+    <div class="sp"></div>
+    <div class="page-tag">Step 09</div>
+    <div class="page-title">預覽 & 傳送</div>
+    <div class="page-sub">確認內容後複製，貼到 Line 傳給學員</div>
+    <div class="preview-box" id="preview"></div>
+    <button class="copy-btn" id="copybtn" onclick="doCopy()">複製 Line 訊息</button>
+    <p class="hint">複製後直接貼到 Line 傳給學員</p>
+    <div style="height:2rem"></div>
+  </div>
+
+  <div class="navrow">
+    <button class="btn-back" id="btn-back" onclick="go(-1)" style="display:none">返回</button>
+    <button class="btn-next" id="btn-next" onclick="go(1)">下一步 →</button>
+  </div>
+</div>
+
+<script>
+const PAGES=['p1','p2','p3','p4','p5','p6','p7','p8','p9'];
+const PAGE_NAMES=['學員資訊','生活習慣','靜態評估','上肢活動度','下肢活動度','動態評估','訓練記錄','後續規劃','預覽傳送'];
+const SLAB=['','狀態不佳','有些疲憊','狀態普通','狀態良好','狀態極佳'];
+let cur=0,stars=0;
+
+document.getElementById('date-display').textContent=new Date().toLocaleDateString('zh-TW',{month:'2-digit',day:'2-digit'});
+
+function go(d){
+  document.getElementById(PAGES[cur]).classList.remove('active');
+  cur=Math.max(0,Math.min(PAGES.length-1,cur+d));
+  document.getElementById(PAGES[cur]).classList.add('active');
+  updateNav();
+  if(cur===PAGES.length-1) buildPreview();
+  window.scrollTo(0,0);
+}
+function updateNav(){
+  const pct=Math.round(((cur+1)/PAGES.length)*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('prog-step').textContent=(cur+1)+' / '+PAGES.length;
+  document.getElementById('prog-name').textContent=PAGE_NAMES[cur];
+  document.getElementById('btn-back').style.display=cur===0?'none':'block';
+  document.getElementById('btn-next').style.display=cur===PAGES.length-1?'none':'block';
+}
+function togMulti(el){el.classList.toggle('sel');}
+function togA(el){
+  el.closest('.assess-chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+function togJ(el){el.classList.toggle('on');}
+function togSingle(el,gid){
+  document.querySelectorAll('#'+gid+' .chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function setStar(n){
+  stars=n;
+  document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('on',i<n));
+  document.getElementById('star-lbl').textContent=SLAB[n]||'';
+}
+function v(id){return(document.getElementById(id)?.value||'').trim();}
+function chips(gid){return[...document.querySelectorAll('#'+gid+' .chip.sel')].map(c=>c.textContent.trim()).join('、');}
+function aGet(row){const el=row?.querySelector('.chip.active');return el?el.textContent.trim():'—';}
+function jGet(row){
+  const sel=[...row.querySelectorAll('.jchip.on')];
+  return sel.length?sel.map(c=>c.textContent.trim()).join('、'):'—';
+}
+
+function buildPreview(){
+  const name=v('f-name')||'＿＿';
+  const age=v('f-age');
+  const goals=chips('goals-chips')||(v('f-goalother')||'＿＿');
+  const exp=v('f-exp')||'—';
+  const trainFreq=v('f-freq')||'—';
+  const injury=v('f-injury');
+  const today=new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'});
+  const starStr=stars?'★'.repeat(stars)+'☆'.repeat(5-stars):'—';
+
+  // p2 assess rows
+  const p2=document.getElementById('p2');
+  const a2=p2.querySelectorAll('.assess-chips');
+  // p3
+  const p3=document.getElementById('p3');
+  const a3=p3.querySelectorAll('.assess-chips');
+  // p4 joints
+  const p4=document.getElementById('p4');
+  const j4=p4.querySelectorAll('.jchip-row');
+  // p5 joints
+  const p5=document.getElementById('p5');
+  const j5=p5.querySelectorAll('.jchip-row');
+  // p6 dynamic
+  const p6=document.getElementById('p6');
+  const a6=p6.querySelectorAll('.assess-chips');
+
+  let m=`🏋️ 第一堂訓練評估報告\n`;
+  m+=`學員：${name}${age?'　'+age+'歲':''}\n`;
+  m+=`日期：${today}　目標：${goals}\n`;
+  m+=`訓練年資：${exp}　目前頻率：${trainFreq}\n`;
+  if(injury)m+=`注意事項：${injury}\n`;
+  m+=`━━━━━━━━━━━━━━━━\n\n`;
+
+  // 生活習慣
+  m+=`🥗 飲食習慣\n`;
+  m+=`  餐數：${aGet(a2[0])}　類型：${aGet(a2[1])}\n`;
+  m+=`  蛋白質：${aGet(a2[2])}　碳水：${aGet(a2[3])}　脂肪：${aGet(a2[4])}\n`;
+  m+=`  飲食控制：${aGet(a2[5])}　訓練前後補充：${aGet(a2[6])}\n`;
+  const foodDetail=v('lf-food-detail');
+  const foodSuggest=v('lf-food-suggest');
+  if(foodDetail)m+=`  細節：${foodDetail}\n`;
+  if(foodSuggest)m+=`  ▸ 飲食建議：${foodSuggest}\n`;
+  m+='\n';
+
+  m+=`💧 水分攝取\n`;
+  m+=`  每日喝水：${aGet(a2[7])}　含糖飲品：${aGet(a2[8])}\n`;
+  m+=`  咖啡因：${aGet(a2[9])}　飲酒：${aGet(a2[10])}\n`;
+  const waterDetail=v('lf-water-detail');
+  const waterSuggest=v('lf-water-suggest');
+  if(waterDetail)m+=`  備註：${waterDetail}\n`;
+  if(waterSuggest)m+=`  ▸ 水分建議：${waterSuggest}\n`;
+  m+='\n';
+
+  m+=`😴 睡眠狀況\n`;
+  m+=`  睡眠時數：${aGet(a2[11])}　入睡：${aGet(a2[13])}　品質：${aGet(a2[14])}\n`;
+  const stNote=v('lf-sleeptime-note');
+  m+=`  作息：${aGet(a2[12])}${stNote?' ('+stNote+')':''}\n`;
+  m+=`  起床狀態：${aGet(a2[15])}\n`;
+  const sleepIssues=chips('sleep-issues');
+  if(sleepIssues)m+=`  異狀：${sleepIssues}\n`;
+  const sleepDetail=v('lf-sleep-detail');
+  if(sleepDetail)m+=`  備註：${sleepDetail}\n`;
+  m+='\n';
+
+  m+=`⚡ 壓力 / 恢復\n`;
+  m+=`  壓力：${aGet(a2[16])}　日常活動：${aGet(a2[17])}\n\n`;
+
+  // 靜態評估
+  m+=`🔍 靜態評估\n`;
+  const sn=['頭頸位置','肩膀高低','肩胛位置','胸椎曲度','腰椎曲度','骨盆傾斜','膝蓋排列','足弓足踝'];
+  const snid=['n-s-head','n-s-shoulder','n-s-scapula','n-s-thoracic','n-s-lumbar','n-s-pelvis','n-s-knee','n-s-foot'];
+  a3.forEach((row,i)=>{
+    const note=v(snid[i]);
+    m+=`  ${sn[i]}：${aGet(row)}${note?'（'+note+'）':''}\n`;
+  });
+  m+='\n';
+
+  // 上肢活動度
+  m+=`🦾 上肢活動度\n`;
+  const un=['肩－過頭','肩內旋(IR)','肩外旋(ER)','水平內收','水平外展','胸椎旋轉','胸椎伸直'];
+  const unid=['n-j-oh','n-j-ir','n-j-er','n-j-cross','n-j-habduct','n-j-trot','n-j-text'];
+  j4.forEach((row,i)=>{
+    const note=v(unid[i]);
+    m+=`  ${un[i]}：${jGet(row)}${note?'（'+note+'）':''}\n`;
+  });
+  m+='\n';
+
+  // 下肢活動度
+  m+=`🦵 下肢活動度\n`;
+  const ln=['髖屈曲','髖內旋','髖外旋','髖伸直','膝屈曲','膝伸直','腳踝背屈','腰椎屈曲','腰椎伸直','腰椎旋轉'];
+  const lnid=['n-j-hf','n-j-hir','n-j-her','n-j-hext','n-j-kf','n-j-ke','n-j-ank','n-j-lf','n-j-le','n-j-lrot'];
+  j5.forEach((row,i)=>{
+    const note=v(lnid[i]);
+    m+=`  ${ln[i]}：${jGet(row)}${note?'（'+note+'）':''}\n`;
+  });
+  m+='\n';
+
+  // 動態評估
+  m+=`⚙️ 動態評估\n`;
+  const dn=[
+    ['深蹲深度',null],['膝蓋追蹤',null],['軀幹控制',null],['腳踝代償','n-d-sq'],
+    ['髖主導',null],['後側鏈張力','n-d-hh'],
+    ['腹內壓',null],['動作穩定性','n-d-core'],
+    ['水平推','n-d-hpush'],['垂直推','n-d-vpush'],
+    ['水平拉','n-d-hpull'],['垂直拉','n-d-vpull']
+  ];
+  // sq note attached after 4th item, hh after 6th, core after 8th
+  const sqNote=v('n-d-sq'),hhNote=v('n-d-hh'),coreNote=v('n-d-core');
+  a6.forEach((row,i)=>{
+    m+=`  ${dn[i][0]}：${aGet(row)}\n`;
+  });
+  if(sqNote)m+=`  深蹲備註：${sqNote}\n`;
+  if(hhNote)m+=`  後側鏈備註：${hhNote}\n`;
+  if(coreNote)m+=`  核心備註：${coreNote}\n`;
+  const hpushN=v('n-d-hpush'),vpushN=v('n-d-vpush'),hpullN=v('n-d-hpull'),vpullN=v('n-d-vpull');
+  if(hpushN)m+=`  水平推備註：${hpushN}\n`;
+  if(vpushN)m+=`  垂直推備註：${vpushN}\n`;
+  if(hpullN)m+=`  水平拉備註：${hpullN}\n`;
+  if(vpullN)m+=`  垂直拉備註：${vpullN}\n`;
+  m+='\n';
+
+  // 訓練記錄
+  m+=`📊 今日狀態　${starStr}　${SLAB[stars]||''}\n`;
+  const training=v('f-training');
+  if(training){
+    m+=`\n💪 今日課程\n`;
+    training.split('\n').filter(l=>l.trim()).forEach(l=>{m+=`  • ${l.trim()}\n`;});
+  }
+  const good=v('f-good'),improve=v('f-improve');
+  if(good||improve){
+    m+=`\n✅ 表現回饋\n`;
+    if(good)m+=`  亮點：${good}\n`;
+    if(improve)m+=`  加強：${improve}\n`;
+  }
+  m+='\n';
+
+  // 後續規劃
+  const direction=v('f-direction'),diet=v('f-diet');
+  if(direction||diet){
+    m+=`🗓 接下來的方向\n`;
+    if(direction)m+=`${direction}\n`;
+    if(diet)m+=`\n🥗 整體飲食建議\n${diet}\n`;
+    m+='\n';
+  }
+
+  const freqRec=chips('freq-chips')||'彈性單堂';
+  const nextbook=v('f-nextbook');
+  const msg=v('f-msg');
+  m+=`━━━━━━━━━━━━━━━━\n`;
+  m+=`📅 預約下一堂\n`;
+  m+=`建議頻率：${freqRec}\n`;
+  if(nextbook)m+=`下次時間：${nextbook}\n`;
+  else m+=`有空的時間傳給我確認 ✅\n`;
+  m+=`Line：wwsskkll\n`;
+  if(msg)m+=`\n💬 給 ${name}\n「${msg}」\n`;
+  m+=`\n下次見 💪`;
+
+  document.getElementById('preview').textContent=m;
+}
+
+function doCopy(){
+  navigator.clipboard.writeText(document.getElementById('preview').textContent).then(()=>{
+    const b=document.getElementById('copybtn');
+    b.textContent='已複製！';
+    setTimeout(()=>b.textContent='複製 Line 訊息',2200);
+  });
+}
+updateNav();
+</script>
+</body>
+</html>
